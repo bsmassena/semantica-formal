@@ -4,6 +4,9 @@
 let e1 = If(IsEmpty(Cons(Bool(true),Nil)),Bool(true),Bool(false))
 let e2 = Hd(Cons(Num(5), Cons(Num(7), Nil)))
 let e3 = Tl(Cons(Num(5), Cons(Num(7), Nil)))
+let sum = Bop(Sum, Num(1), Num(2))
+let mult = Bop(Mult, Num(3), Num(4))
+let eq = Bop(Eq, Num(4), Num(4))
 
 (* Expressoes acima podem seguinte forma:
 
