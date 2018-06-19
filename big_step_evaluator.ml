@@ -1,5 +1,17 @@
 #use "type_definitions.ml"
 
+(* FUNÇÕES AUXILIARES *)
+
+let rec find_from_enviroment (env : enviroment) (label : variable) = (
+  match env with
+    [] -> Raise
+    | _ -> find_in_not_empty_list env label
+) and find_in_not_empty_list (env : enviroment) (label : variable) = (
+  match List.hd env with
+    (l, value) when l = label -> value
+    | _ ->  let new_env = List.tl env in find_from_enviroment new_env label
+)
+
 (* AVALIADOR SEMÂNTICA BIG-STEP *)
 
 let rec evaluate (env : enviroment) (e : expr) = (
@@ -58,6 +70,8 @@ let rec evaluate (env : enviroment) (e : expr) = (
       )
     )
 
+    | Var(label) -> find_from_enviroment env label
+
     (* === REGRAS A SEREM IMPLEMENTADAS === *)
     (* BS-FN *)
     (* BS-APP *)
@@ -114,9 +128,7 @@ let rec evaluate (env : enviroment) (e : expr) = (
     )
     (* BS-RAISE *)
     | Raise -> Raise
-
 )
-
 
 (* Inicialmente avaliacao está sendo testada com um ambiente vazio *)
 let eval e = evaluate [] e
