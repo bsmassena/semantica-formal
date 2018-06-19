@@ -13,6 +13,41 @@ let rec evaluate (env : enviroment) (e : expr) = (
     (* BS-ID *)
     (* ==================================== *)
 
+    | Bop(op, e1, e2) -> (
+      let e1' = evaluate env e1 in
+      let e2' = evaluate env e2 in (
+        match op with
+          Sum -> (
+            match (e1', e2') with
+              (Vnum(v1), Vnum(v2)) -> Vnum(v1 + v2)
+              | _ -> Raise
+          )
+          | Diff -> (
+            match (e1', e2') with
+              (Vnum(v1), Vnum(v2)) -> Vbool(v1 != v2)
+              | (Vbool(v1), Vbool(v2)) -> Vbool(v1 != v2)
+              | _ -> Raise
+          )
+          | Mult -> (
+            match (e1', e2') with
+              (Vnum(v1), Vnum(v2)) -> Vnum(v1 * v2)
+              | _ -> Raise
+          )
+          | Div -> (
+            match (e1', e2') with
+              (_, Vnum(0)) -> Raise
+              | (Vnum(v1), Vnum(v2)) -> Vnum(v1 / v2)
+              | _ -> Raise
+          )
+          | Eq -> (
+            match (e1', e2') with
+              (Vnum(v1), Vnum(v2)) -> Vbool(v1 == v2)
+              | (Vbool(v1), Vbool(v2)) -> Vbool(v1 == v2)
+              | _ -> Raise
+          )
+      )
+    )
+
     (* BS-IF *)
     | If(e1, e2, e3) -> (
       let e1' = evaluate env e1 in (
