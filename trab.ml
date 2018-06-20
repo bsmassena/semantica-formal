@@ -8,6 +8,8 @@ let sum = Bop(Sum, Num(1), Num(2))
 let mult = Bop(Mult, Num(3), Num(4))
 let eq = Bop(Eq, Num(4), Num(4))
 
+let test_env = [("x", Vnum(2)); ("y", Vnum(3))]
+
 (* Expressoes acima podem seguinte forma:
 
 	- No terminal linux, execute o comando:
