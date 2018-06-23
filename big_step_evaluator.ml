@@ -20,11 +20,9 @@ let rec evaluate (env : enviroment) (e : expr) = (
     Num(n) -> Vnum(n)
     (* BS-BOOL *)
     | Bool(b) -> Vbool(b)
-
-    (* === REGRAS A SEREM IMPLEMENTADAS === *)
     (* BS-ID *)
-    (* ==================================== *)
-
+    | Var(label) -> find_from_enviroment env label
+    (* BS-OP *)
     | Bop(op, e1, e2) -> (
       let e1' = evaluate env e1 in
       let e2' = evaluate env e2 in (
@@ -37,7 +35,6 @@ let rec evaluate (env : enviroment) (e : expr) = (
           | Diff -> (
             match (e1', e2') with
               (Vnum(v1), Vnum(v2)) -> Vbool(v1 != v2)
-              | (Vbool(v1), Vbool(v2)) -> Vbool(v1 != v2)
               | _ -> Raise
           )
           | Mult -> (
@@ -54,12 +51,40 @@ let rec evaluate (env : enviroment) (e : expr) = (
           | Eq -> (
             match (e1', e2') with
               (Vnum(v1), Vnum(v2)) -> Vbool(v1 == v2)
-              | (Vbool(v1), Vbool(v2)) -> Vbool(v1 == v2)
+              | _ -> Raise
+          )
+          | Leq -> (
+            match (e1', e2') with
+              (Vnum(v1), Vnum(v2)) -> Vbool(v1 <= v2)
+              | _ -> Raise
+          )
+          | Less -> (
+            match (e1', e2') with
+              (Vnum(v1), Vnum(v2)) -> Vbool(v1 < v2)
+              | _ -> Raise
+          )
+          | Geq -> (
+            match (e1', e2') with
+              (Vnum(v1), Vnum(v2)) -> Vbool(v1 >= v2)
+              | _ -> Raise
+          )
+          | Greater -> (
+            match (e1', e2') with
+              (Vnum(v1), Vnum(v2)) -> Vbool(v1 > v2)
+              | _ -> Raise
+          )
+          | And -> (
+            match (e1', e2') with
+              (Vbool(v1), Vbool(v2)) -> Vbool(v1 && v2)
+              | _ -> Raise
+          )
+          | Or -> (
+            match (e1', e2') with
+              (Vbool(v1), Vbool(v2)) -> Vbool(v1 || v2)
               | _ -> Raise
           )
       )
     )
-
     (* BS-IF *)
     | If(e1, e2, e3) -> (
       let e1' = evaluate env e1 in (
@@ -69,16 +94,28 @@ let rec evaluate (env : enviroment) (e : expr) = (
         | Raise -> Raise
       )
     )
-
-    | Var(label) -> find_from_enviroment env label
-
-    (* === REGRAS A SEREM IMPLEMENTADAS === *)
     (* BS-FN *)
+    | Lam(x, t, e) -> Vclos(x, e, env)
     (* BS-APP *)
+    | App(e1, e2) -> (
+        let e1' = evaluate env e1 in
+        let e2' = evaluate env e2 in (
+            match(e1', e2') with
+            | (Vclos(x, e, env'), v) -> evaluate ((x,v)::env') e
+            | (Vrclos(f, x, e, env'), v) -> evaluate ((x,v)::(f,Vrclos(f,x,e,env'))::env') e
+            | (Raise,_) -> Raise
+            | (_,Raise) -> Raise
+        )
+    )
     (* BS-LET *)
+    | Let(x, t, e1, e2) -> let e1' = (evaluate env e1) in (
+                               match e1' with
+                               | Raise -> Raise
+                               | _ -> evaluate ((x,e1')::env) e2
+                            )
     (* BS-LETREC *)
-    (* ==================================== *)
-
+    | Lrec(f,t1,t2,x,t1',e1,e2) -> let rclos = Vrclos(f,x,e1,env) in
+                                       evaluate ((f,rclos)::env) e2
     (* BS-CONS *)
     | Cons(e1, e2) -> (
       let e1' = evaluate env e1 in
@@ -132,3 +169,8 @@ let rec evaluate (env : enviroment) (e : expr) = (
 
 (* Inicialmente avaliacao está sendo testada com um ambiente vazio *)
 let eval e = evaluate [] e
+
+(* Avaliação com variaveis definidas no ambiente *)
+let test_env = [("x", Vnum(2)); ("y", Vnum(3))]
+
+let eval_env e = evaluate test_env e

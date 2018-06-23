@@ -8,7 +8,10 @@ let sum = Bop(Sum, Num(1), Num(2))
 let mult = Bop(Mult, Num(3), Num(4))
 let eq = Bop(Eq, Num(4), Num(4))
 
-let test_env = [("x", Vnum(2)); ("y", Vnum(3))]
+let var = Var("x")
+let let_test = Let("z", TyInt, Num(7), Var("z"))
+
+
 
 (* Expressoes acima podem seguinte forma:
 

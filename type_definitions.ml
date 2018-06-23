@@ -4,9 +4,9 @@ type variable = string
 
 (* SEMÂNTICA BIG-STEP *)
 
-type operator = Sum | Diff | Mult | Div | Eq | Leq 
+type operator = Sum | Diff | Mult | Div | Eq | Leq | Less | Geq | Greater | And | Or
 
-type tipo  = TyInt | TyBool | TyFn of tipo * tipo | TyList of tipo
+type tipo  = TyInt | TyBool | TyFn of tipo * tipo | TyList of tipo | TyId of string
 
 
 type expr = Num of int 
