@@ -2,6 +2,7 @@
 
 (* FUNÇÕES AUXILIARES *)
 
+(* Acha uma variavel no ambiente passado como argumento em "evaluate". Se ela nao existir, gera Raise*)
 let rec find_from_enviroment (env : enviroment) (label : variable) = (
   match env with
     [] -> Raise
@@ -22,69 +23,6 @@ let rec evaluate (env : enviroment) (e : expr) = (
     | Bool(b) -> Vbool(b)
     (* BS-ID *)
     | Var(label) -> find_from_enviroment env label
-    (* BS-OP *)
-    | Bop(op, e1, e2) -> (
-      let e1' = evaluate env e1 in
-      let e2' = evaluate env e2 in (
-        match op with
-          Sum -> (
-            match (e1', e2') with
-              (Vnum(v1), Vnum(v2)) -> Vnum(v1 + v2)
-              | _ -> Raise
-          )
-          | Diff -> (
-            match (e1', e2') with
-              (Vnum(v1), Vnum(v2)) -> Vbool(v1 != v2)
-              | _ -> Raise
-          )
-          | Mult -> (
-            match (e1', e2') with
-              (Vnum(v1), Vnum(v2)) -> Vnum(v1 * v2)
-              | _ -> Raise
-          )
-          | Div -> (
-            match (e1', e2') with
-              (_, Vnum(0)) -> Raise
-              | (Vnum(v1), Vnum(v2)) -> Vnum(v1 / v2)
-              | _ -> Raise
-          )
-          | Eq -> (
-            match (e1', e2') with
-              (Vnum(v1), Vnum(v2)) -> Vbool(v1 == v2)
-              | _ -> Raise
-          )
-          | Leq -> (
-            match (e1', e2') with
-              (Vnum(v1), Vnum(v2)) -> Vbool(v1 <= v2)
-              | _ -> Raise
-          )
-          | Less -> (
-            match (e1', e2') with
-              (Vnum(v1), Vnum(v2)) -> Vbool(v1 < v2)
-              | _ -> Raise
-          )
-          | Geq -> (
-            match (e1', e2') with
-              (Vnum(v1), Vnum(v2)) -> Vbool(v1 >= v2)
-              | _ -> Raise
-          )
-          | Greater -> (
-            match (e1', e2') with
-              (Vnum(v1), Vnum(v2)) -> Vbool(v1 > v2)
-              | _ -> Raise
-          )
-          | And -> (
-            match (e1', e2') with
-              (Vbool(v1), Vbool(v2)) -> Vbool(v1 && v2)
-              | _ -> Raise
-          )
-          | Or -> (
-            match (e1', e2') with
-              (Vbool(v1), Vbool(v2)) -> Vbool(v1 || v2)
-              | _ -> Raise
-          )
-      )
-    )
     (* BS-IF *)
     | If(e1, e2, e3) -> (
       let e1' = evaluate env e1 in (
@@ -165,4 +103,24 @@ let rec evaluate (env : enviroment) (e : expr) = (
     )
     (* BS-RAISE *)
     | Raise -> Raise
+    (* BS-OP *)
+    | Bop(op, e1, e2) -> (
+        let e1' = evaluate env e1 in
+        let e2' = evaluate env e2 in (
+            match(op, e1', e2') with
+                (Sum, Vnum n1, Vnum n2) -> Vnum(n1 + n2)
+              | (Diff, Vnum n1, Vnum n2) -> Vnum(n1 - n2)
+              | (Mult, Vnum n1, Vnum n2) -> Vnum(n1 * n2)
+              | (Div, Vnum n1, Vnum n2) -> if n2 != 0 then Vnum(n1 / n2) else Raise
+              | (Eq, Vnum n1, Vnum n2) -> Vbool(n1 == n2)
+              | (Leq, Vnum n1, Vnum n2) -> Vbool(n1 <= n2)
+              | (Less, Vnum n1, Vnum n2) -> Vbool(n1 < n2)
+              | (Geq, Vnum n1, Vnum n2) -> Vbool(n1 >= n2)
+              | (Greater, Vnum n1, Vnum n2) -> Vbool(n1 > n2)
+              | (And, Vbool b1, Vbool b2) -> Vbool(b1 && b2)
+              | (Or, Vbool b1, Vbool b2) -> Vbool(b1 || b2)
+              | (_, Raise, _) -> Raise
+              | (_, _, Raise) -> Raise
+        )
+    )
 )
