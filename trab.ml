@@ -1,36 +1,62 @@
 #use "big_step_evaluator.ml"
+#use "type_inference.ml"
+#use "debugging.ml"
 
-(* Expressoes para teste *)
-let e1 = If(IsEmpty(Cons(Bool(true),Nil)),Bool(true),Bool(false))
-let e2 = Hd(Cons(Num(5), Cons(Num(7), Nil)))
-let e3 = Tl(Cons(Num(5), Cons(Num(7), Nil)))
-let sum = Bop(Sum, Num(1), Num(2))
-let mult = Bop(Mult, Num(3), Num(4))
-let eq = Bop(Eq, Num(4), Num(4))
 
-let var = Var("x")
+(* === EXPRESSOES PARA TESTES === *)
+
+(* IF *)
+let if_test = If(IsEmpty(Cons(Bool(true),Nil)),Bool(true),Bool(false))
+(* LISTA - HEAD *)
+let head_test = Hd(Cons(Num(5), Cons(Num(7), Nil)))
+(* LISTA - TAIL *)
+let tail_test = Tl(Cons(Num(5), Cons(Num(7), Nil)))
+(* SOMA *)
+let sum_test = Bop(Sum, Num(1), Num(2))
+(* PRODUTO *)
+let mult_test = Bop(Mult, Num(3), Num(4))
+(* IGUAL *)
+let equal_test = Bop(Eq, Num(4), Num(4))
+(* VAR *)
+let var_test = Var("x")
+(* LET *)
 let let_test = Let("z", TyInt, Num(7), Var("z"))
+let let_test2 = Let("y", TyInt, Num(7), Bop(Mult,Var("y"), Num(10)))
+(* LET REC *)
+let letrec_test = (Lrec("fat", TyInt, TyInt, "x", TyInt,
+					If(Bop(Eq, Var("x"), Num(0)),
+						Num(1),
+						Bop(Mult, Var("x"), App(Var("fat"), Bop(Diff, Var("x"), Num(1))))),
+					App(Var("fat"), Num(5)))
+				  )
+
+
+(* === TESTES DE AVALIAÇAO === *)
+
+(* Inicialmente avaliacao está sendo testada com um ambiente vazio *)
+let eval e = evaluate [] e
+
+(* Definicao de variaveis no ambiente *)
+let test_env = [("x", Vnum(2)); ("y", Vnum(3))]
+
+(* Avaliação com variaveis definidas no ambiente *)
+let eval_env e = evaluate test_env e
 
 
 
-(* Expressoes acima podem seguinte forma:
+(* === TESTES DE INFERENCIA DE TIPOS === *)
 
-	- No terminal linux, execute o comando:
-		ocaml
+ (* Lista com expressoes de teste *)
+let expr_list = [letrec_test; mult_test; head_test; tail_test; if_test; tail_test]
 
-	- Após abrir o interpretador, execute o comando: 
-		# use "trab.ml" 
-			*(com o hashtag, ou seja, existem dois hashtags na tela)
+(* Teste de inferencia de tipo com expressoes da lista *)
+let inference_test = print_inferred_types expr_list
 
-	- Expressoes podem ser testadas com:
-		eval nome_da_expressao
-			*Por exemplo:
-				eval e1
- *)
+let parameters_inference_test = print_sub_inferred_types expr_list
 
 
 
-(* EXEMPLO DO PROFESSOR *)
+(* --- EXEMPLO DE TESTE DO PROFESSOR --- *)
 
 (* Segue um exemplo de como o programa L1 abaixo pode ser representado internamente *)
 
@@ -38,13 +64,3 @@ let let_test = Let("z", TyInt, Num(7), Var("z"))
    in fat (5)
    end
 *)
-
-(*
-Lrec("fat", TyInt, TyInt, "x", TyInt,
-If(Bop(Eq, Var("x"), Num(0)),
-   Num(1),
-   Bop(Mult, Var("x"), App(Var("fat"), Bop(Diff, Var("x"), Num(1))))),
-App(Var("fat"), Num(5)))
-*)
-
-(* let rec typeInfer (env : enviroment) (e : expr) = ( *)

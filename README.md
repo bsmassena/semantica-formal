@@ -27,4 +27,4 @@
 
         eval nome_da_expressao
 
-        Ex.: eval e1
+        Ex.: eval if_test

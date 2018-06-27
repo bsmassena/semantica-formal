@@ -25,7 +25,7 @@ type expr = Num of int
       | Tl of expr
       | IsEmpty of expr
       (* expressões tryWith-raise *)
-          | TryWith of expr * expr
+      | TryWith of expr * expr
       | Raise
 
 type value = Vnum of int 
@@ -37,4 +37,13 @@ type value = Vnum of int
       | Vnil
       | Raise
 and
-  enviroment = (variable * value) list
+      enviroment = (variable * value) list
+and
+      type_enviroment = (variable * tipo) list
+
+type nextuvar = NextUVar of string * uvargenerator
+and uvargenerator = unit -> nextuvar
+
+let uvargen =
+  let rec f n () = NextUVar("?X_" ^ string_of_int n, f (n+1))
+  in f 0

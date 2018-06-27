@@ -121,9 +121,9 @@ let rec evaluate (env : enviroment) (e : expr) = (
       let e1' = evaluate env e1 in
       let e2' = evaluate env e2 in (
         match (e1',e2') with
-        | _ -> Vcons(e1', e2')
         | (Raise,_) -> Raise
         | (_,Raise) -> Raise
+        | _ -> Vcons(e1', e2')
       )
     )
     (* BS-NIL *)
@@ -166,11 +166,3 @@ let rec evaluate (env : enviroment) (e : expr) = (
     (* BS-RAISE *)
     | Raise -> Raise
 )
-
-(* Inicialmente avaliacao está sendo testada com um ambiente vazio *)
-let eval e = evaluate [] e
-
-(* Avaliação com variaveis definidas no ambiente *)
-let test_env = [("x", Vnum(2)); ("y", Vnum(3))]
-
-let eval_env e = evaluate test_env e
