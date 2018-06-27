@@ -23,8 +23,12 @@
     
     * com o **#**, ou seja, existem dois hashtags na tela
 
-- Finalmente, expressoes _definidas no arquivo .ml_ podem ser testadas com:
+- Finalmente, expressões _definidas no arquivo "trab.ml" podem ser **AVALIADAS** com:
 
         eval nome_da_expressao
 
-        Ex.: eval if_test
+        Por exemplo: eval if_test
+
+## Testes de inferência de tipos
+
+- Testes de **INFERÊNCIA DE TIPOS** são impressos na tela com números que representam posição da expressao na lista de expressões definidas no arquivo "trab.ml".
