@@ -31,4 +31,4 @@
 
 ## Testes de inferência de tipos
 
-- Testes de **INFERÊNCIA DE TIPOS** são impressos na tela com números que representam posição da expressao na lista de expressões definidas no arquivo "trab.ml".
+- Testes de **INFERÊNCIA DE TIPOS** são impressos na tela com números que representam posição da expressao na lista de expressões (_expr_list_) definidas no arquivo "trab.ml".

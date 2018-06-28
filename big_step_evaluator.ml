@@ -2,7 +2,7 @@
 
 (* FUNÇÕES AUXILIARES *)
 
-(* Acha uma variavel no ambiente passado como argumento em "evaluate". Se ela nao existir, gera Raise*)
+(* Acha uma variavel no ambiente passado como argumento em "evaluate". Se ela nao existir, gera Raise *)
 let rec find_from_enviroment (env : enviroment) (label : variable) = (
   match env with
     [] -> Raise

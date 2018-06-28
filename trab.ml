@@ -36,9 +36,8 @@ let letrec_test = (Lrec("fat", TyInt, TyInt, "x", TyInt,
 (* Inicialmente avaliacao está sendo testada com um ambiente vazio *)
 let eval e = evaluate [] e
 
-(* Definicao de variaveis no ambiente *)
+(* Podem ser definidas variáveis previamente em um ambiente *)
 let test_env = [("x", Vnum(2)); ("y", Vnum(3))]
-
 (* Avaliação com variaveis definidas no ambiente *)
 let eval_env e = evaluate test_env e
 
@@ -51,7 +50,6 @@ let expr_list = [letrec_test; mult_test; head_test; tail_test; if_test; tail_tes
 
 (* Teste de inferencia de tipo com expressoes da lista *)
 let partial_inference_test = print_sub_inferred_types expr_list
-
 let inference_test = print_inferred_types expr_list
 
 

@@ -1,7 +1,10 @@
 
 (* Arquivo com funcoes para inferencia de tipos *)
 
+
 exception TypeNotFound of string
+
+(* === COLETA DE CONSTRAINTS === *)
 
 let rec get_constraints_rec (type_env: type_enviroment) nextuvar (expression: expr) = match expression with
   | Num(t) -> (TyInt, nextuvar, [])
@@ -12,142 +15,142 @@ let rec get_constraints_rec (type_env: type_enviroment) nextuvar (expression: ex
                 | _ -> (term, nextuvar, [])))
         with _ -> raise (TypeNotFound "Couldn't get variable constraint."))
   | If(t1,t2,t3) ->
-        let (tyT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t1 in
-        let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar1 t2 in
-        let (tyT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
-        let newconstr = [(tyT1,TyBool); (tyT2,tyT3)] in
-        (tyT3, nextuvar3,
+        let (typeT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t1 in
+        let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar1 t2 in
+        let (typeT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
+        let newconstr = [(typeT1,TyBool); (typeT2,typeT3)] in
+        (typeT3, nextuvar3,
             List.concat [newconstr; constr1; constr2; constr3])
   | Lam(v1,t1,e1) ->
-        let newctx = [(v1,t1)] in
-        let (tyT1,nextuvar1,constr1) = get_constraints_rec (List.concat [newctx;type_env]) nextuvar e1 in
-        (tyT1, nextuvar1,
+        let newctypeX = [(v1,t1)] in
+        let (typeT1,nextuvar1,constr1) = get_constraints_rec (List.concat [newctypeX;type_env]) nextuvar e1 in
+        (typeT1, nextuvar1,
             List.concat [constr1])
   | App(t1,t2) ->
-        let (tyT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t1 in
-        let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar1 t2 in
-        let NextUVar(tyX,nextuvar') = nextuvar2() in
-        let newconstr = [(tyT1,TyFn(tyT2,TyId(tyX)))] in
-        ((TyId(tyX)), nextuvar',
+        let (typeT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t1 in
+        let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar1 t2 in
+        let NextUVar(typeX,nextuvar') = nextuvar2() in
+        let newconstr = [(typeT1,TyFn(typeT2,TyId(typeX)))] in
+        ((TyId(typeX)), nextuvar',
             List.concat [newconstr; constr1; constr2])
   | Let(var1,t2,expr1,expr2) ->
-        let (tyT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar expr1 in
-        let NextUVar(tyX1,nextuvar2) = nextuvar1() in
-        let newctx = [(var1,TyId(tyX1))] in
-        let (tyT2,nextuvar3,constr2) = get_constraints_rec (List.concat [newctx;type_env]) nextuvar2 expr2 in
-        let newconstr = [(t2, tyT1)] in
-        (tyT2, nextuvar3,
+        let (typeT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar expr1 in
+        let NextUVar(typeX1,nextuvar2) = nextuvar1() in
+        let newctypeX = [(var1,TyId(typeX1))] in
+        let (typeT2,nextuvar3,constr2) = get_constraints_rec (List.concat [newctypeX;type_env]) nextuvar2 expr2 in
+        let newconstr = [(t2, typeT1)] in
+        (typeT2, nextuvar3,
             List.concat [newconstr; constr1; constr2])
   | Lrec(var1,t1,t2,var2,t3,expr1,expr2) ->
-        let firstctx = [(var1, TyFn(t1,t2))] in
-        let secondctx = [(var2, t3)] in
-        let (tyT1,nextuvar1,constr1) = get_constraints_rec (List.concat [secondctx;firstctx;type_env]) nextuvar expr1 in
-        let (tyT2,nextuvar2,constr2) = get_constraints_rec (List.concat [firstctx;type_env]) nextuvar1 expr2 in
-        let newconstr = [(t3, tyT1)] in
-        (tyT2, nextuvar2,
+        let firstctypeX = [(var1, TyFn(t1,t2))] in
+        let secondctypeX = [(var2, t3)] in
+        let (typeT1,nextuvar1,constr1) = get_constraints_rec (List.concat [secondctypeX;firstctypeX;type_env]) nextuvar expr1 in
+        let (typeT2,nextuvar2,constr2) = get_constraints_rec (List.concat [firstctypeX;type_env]) nextuvar1 expr2 in
+        let newconstr = [(t3, typeT1)] in
+        (typeT2, nextuvar2,
             List.concat [newconstr; constr1; constr2])
   | Cons(t1,t2) ->
-        let (tyT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t1 in
-        let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar1 t2 in
-        let newconstr = [(TyList tyT1,tyT2)] in
-        (tyT2, nextuvar2,
+        let (typeT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t1 in
+        let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar1 t2 in
+        let newconstr = [(TyList typeT1,typeT2)] in
+        (typeT2, nextuvar2,
             List.concat [newconstr; constr1; constr2])
   | Nil ->
-        let NextUVar(tyX,nextuvar') = nextuvar() in
-        (TyList(TyId(tyX)), nextuvar', [])
+        let NextUVar(typeX,nextuvar') = nextuvar() in
+        (TyList(TyId(typeX)), nextuvar', [])
   | Hd(t1) ->
-        let (tyT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t1 in
-        let NextUVar(tyX,nextuvar') = nextuvar1() in
-        let newconstr = [(tyT1,TyList(TyId(tyX)))] in
-        ((TyId(tyX)), nextuvar',
+        let (typeT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t1 in
+        let NextUVar(typeX,nextuvar') = nextuvar1() in
+        let newconstr = [(typeT1,TyList(TyId(typeX)))] in
+        ((TyId(typeX)), nextuvar',
             List.concat [newconstr; constr1])
   | Tl(t1) ->
-        let (tyT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t1 in
-        let NextUVar(tyX,nextuvar') = nextuvar1() in
-        let newconstr = [(tyT1,TyList(TyId(tyX)))] in
-        ((TyId(tyX)), nextuvar',
+        let (typeT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t1 in
+        let NextUVar(typeX,nextuvar') = nextuvar1() in
+        let newconstr = [(typeT1,TyList(TyId(typeX)))] in
+        ((TyId(typeX)), nextuvar',
             List.concat [newconstr; constr1])
   | IsEmpty(t) ->
-        let (tyT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t in
-        let NextUVar(tyX,nextuvar') = nextuvar1() in
-        let newconstr = [(tyT1,TyList(TyId(tyX)))] in
-        ((TyId(tyX)), nextuvar',
+        let (typeT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t in
+        let NextUVar(typeX,nextuvar') = nextuvar1() in
+        let newconstr = [(typeT1,TyList(TyId(typeX)))] in
+        ((TyId(typeX)), nextuvar',
             List.concat [newconstr; constr1])
   | TryWith(t1,t2) ->
-        let (tyT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t1 in
-        let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar1 t2 in
-        let newconstr = [(tyT1,tyT2)] in
-        (tyT2, nextuvar2,
+        let (typeT1,nextuvar1,constr1) = get_constraints_rec type_env nextuvar t1 in
+        let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar1 t2 in
+        let newconstr = [(typeT1,typeT2)] in
+        (typeT2, nextuvar2,
             List.concat [newconstr; constr1; constr2])
   | Raise ->
-        let NextUVar(tyX,nextuvar') = nextuvar() in
-        (TyId(tyX), nextuvar', [])
+        let NextUVar(typeX,nextuvar') = nextuvar() in
+        (TyId(typeX), nextuvar', [])
   | Bop(t1,t2,t3) -> (
         (match t1 with
             | Eq ->
-                let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
-                let (tyT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
-                let newconstr = [(tyT2, TyInt);(tyT3, TyInt)] in
+                let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
+                let (typeT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
+                let newconstr = [(typeT2, TyInt);(typeT3, TyInt)] in
                 (TyBool, nextuvar3,
                     List.concat [newconstr; constr2; constr3])
             | Leq ->
-                let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
-                let (tyT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
-                let newconstr = [(tyT2, TyInt);(tyT3, TyInt)] in
+                let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
+                let (typeT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
+                let newconstr = [(typeT2, TyInt);(typeT3, TyInt)] in
                 (TyBool, nextuvar3,
                     List.concat [newconstr; constr2; constr3])
             | Less ->
-                let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
-                let (tyT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
-                let newconstr = [(tyT2, TyInt);(tyT3, TyInt)] in
+                let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
+                let (typeT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
+                let newconstr = [(typeT2, TyInt);(typeT3, TyInt)] in
                 (TyBool, nextuvar3,
                     List.concat [newconstr; constr2; constr3])
             | Geq ->
-                let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
-                let (tyT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
-                let newconstr = [(tyT2, TyInt);(tyT3, TyInt)] in
+                let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
+                let (typeT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
+                let newconstr = [(typeT2, TyInt);(typeT3, TyInt)] in
                 (TyBool, nextuvar3,
                     List.concat [newconstr; constr2; constr3])
             | Greater ->
-                let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
-                let (tyT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
-                let newconstr = [(tyT2, TyInt);(tyT3, TyInt)] in
+                let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
+                let (typeT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
+                let newconstr = [(typeT2, TyInt);(typeT3, TyInt)] in
                 (TyBool, nextuvar3,
                     List.concat [newconstr; constr2; constr3])
             | Or ->
-                let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
-                let (tyT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
-                let newconstr = [(tyT2, TyBool);(tyT3, TyBool)] in
+                let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
+                let (typeT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
+                let newconstr = [(typeT2, TyBool);(typeT3, TyBool)] in
                 (TyBool, nextuvar3,
                     List.concat [newconstr; constr2; constr3])
             | And ->
-                let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
-                let (tyT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
-                let newconstr = [(tyT2, TyBool);(tyT3, TyBool)] in
+                let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
+                let (typeT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
+                let newconstr = [(typeT2, TyBool);(typeT3, TyBool)] in
                 (TyBool, nextuvar3,
                     List.concat [newconstr; constr2; constr3])
             | Sum ->
-                let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
-                let (tyT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
-                let newconstr = [(tyT2, TyInt);(tyT3, TyInt)] in
+                let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
+                let (typeT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
+                let newconstr = [(typeT2, TyInt);(typeT3, TyInt)] in
                 (TyInt, nextuvar3,
                     List.concat [newconstr; constr2; constr3])
             | Diff ->
-                let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
-                let (tyT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
-                let newconstr = [(tyT2, TyInt);(tyT3, TyInt)] in
+                let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
+                let (typeT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
+                let newconstr = [(typeT2, TyInt);(typeT3, TyInt)] in
                 (TyInt, nextuvar3,
                     List.concat [newconstr; constr2; constr3])
             | Mult ->
-                let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
-                let (tyT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
-                let newconstr = [(tyT2, TyInt);(tyT3, TyInt)] in
+                let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
+                let (typeT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
+                let newconstr = [(typeT2, TyInt);(typeT3, TyInt)] in
                 (TyInt, nextuvar3,
                     List.concat [newconstr; constr2; constr3])
             | Div ->
-                let (tyT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
-                let (tyT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
-                let newconstr = [(tyT2, TyInt);(tyT3, TyInt)] in
+                let (typeT2,nextuvar2,constr2) = get_constraints_rec type_env nextuvar t2 in
+                let (typeT3,nextuvar3,constr3) = get_constraints_rec type_env nextuvar2 t3 in
+                let newconstr = [(typeT2, TyInt);(typeT3, TyInt)] in
                 (TyInt, nextuvar3,
                     List.concat [newconstr; constr2; constr3])
             )
@@ -156,72 +159,72 @@ let rec get_constraints_rec (type_env: type_enviroment) nextuvar (expression: ex
 let get_constraints type_enviroment expression = get_constraints_rec type_enviroment uvargen expression
 
 
+(* === UNIFY === *)
 
-(***** UNIFY *****)
-exception UnifyFailed of string
-
-(* Funções auxiliares *)
-(* Substitui X por T no tipo S*)
-let substitutionInType tyX tyT tyS =
-  let rec subs tyS = match tyS with
-    | TyList(tyS1) -> TyList(subs tyS1)
-    | TyFn(tyS1, tyS2) -> TyFn(subs tyS1, subs tyS2)
-    | TyInt -> TyInt
-    | TyBool -> TyBool
-    | TyId(s) -> (if s=tyX then tyT else TyId(s)) (* se for X, troca por T*)
-  in subs tyS
-
-(* Chama a substituição de tyX por tyT para cada equação do conjunto*)
-let sustitutionInTyEquation tyX tyT tyEquations =
-  List.map (fun (tyS1,tyS2) -> (substitutionInType tyX tyT tyS1, substitutionInType tyX tyT tyS2)) tyEquations
-
-(* Verifica se o tipo X ocorre em T*)
-let occurCheck tyX tyT =
-  let rec occur tyT = match tyT with
-    | TyList(tyT1) -> occur tyT1
-    | TyFn(tyT1,tyT2) -> occur tyT1 || occur tyT2
-    | TyInt -> false
-    | TyBool -> false
-    | TyId(s) -> (s=tyX) (* define se X ocorre ou não em T*)
-  in occur tyT
-
-(* Função de Unify *)
-(* Recebe as equações de tipo em tyEquations e retorna as substituições de tipo*)
-(* let tySubstitutions = unify tyEquations *)
-let unify tyEquations =
-  let rec unify_rec tyEquations = match tyEquations with
-    | [] -> []
-    | (TyInt,TyInt) :: tail -> unify_rec tail (* Caso 1 *)
-    | (TyBool,TyBool) :: tail -> unify_rec tail (* Caso 2 *)
-    | (TyId(tyX),tyT) :: tail -> (* Caso 4 *)
-        if tyT = TyId(tyX) then unify_rec tail (* Caso 3 *)
-        else if occurCheck tyX tyT then (* Se X ocorre em T, não é uma equação válida*)
-          raise (UnifyFailed "occurCheck didn't pass: circular type")
-        else (* Se não, faz a substituição de X por T no resto das equações e chama o Unify novamente. Ainda, adiciona na lista de substituições (X,T)*)
-          List.append (unify_rec (sustitutionInTyEquation tyX tyT tail)) [(TyId(tyX),tyT)]
-    | (tyT,TyId(tyX)) :: tail -> (* Caso 5 *)
-        if tyT = TyId(tyX) then unify_rec tail (* Caso 3 *)
-        else if occurCheck tyX tyT then (* Se X ocorre em T, não é uma equação válida*)
-          raise (UnifyFailed "occurCheck didn't pass: circular type")
-        else (* Se não, faz a substituição de X por T no resto das equações e chama o Unify novamente. Ainda, adiciona na lista de substituições (X,T)*)
-          List.append (unify_rec (sustitutionInTyEquation tyX tyT tail)) [(TyId(tyX),tyT)]
-    | (TyFn(tyT1,tyT2),TyFn(tyT3,tyT4)) :: tail -> unify_rec ((tyT1,tyT3) :: (tyT2,tyT4) :: tail) (* Caso 6 *)
-    | (TyList(tyT1),TyList(tyT2)) :: tail -> unify_rec ((tyT1,tyT2) :: tail) (* Caso 7 *)
-    | (tyS,tyT)::tail -> raise (UnifyFailed "Not possible to solve type equations")
-  in unify_rec tyEquations
+(** Exceções para Unify **)
+exception NotUnifiable of string
+exception CyclicSubstitution of string
 
 
-(*** ApplySubs ***)
-(* Aplica as substituições obtidas no Unify no tipo obtido pelo get_constraints *)
-(* List.fold_left f a [b1; ...; bn] is f (... (f (f a b1) b2) ...) bn *)
-let applySubs tySubstitutions tyT =
-  List.fold_left (fun tyS (TyId(tyX),tyC2) -> substitutionInType tyX tyC2 tyS) tyT (List.rev tySubstitutions)
+(** Funções auxiliares para UNIFY **)
+
+let check_if_occurs typeX typeT =
+    let rec occur typeT = match typeT with
+        | TyList(typeT1) -> occur typeT1
+        | TyFn(typeT1,typeT2) -> occur typeT1 || occur typeT2
+        | TyInt -> false
+        | TyBool -> false
+        | TyId(s) -> (s=typeX)
+    in occur typeT
+
+let apply_substitution_type typeX typeT typeS =
+    let rec subs typeS = match typeS with
+        | TyList(typeS1) -> TyList(subs typeS1)
+        | TyFn(typeS1, typeS2) -> TyFn(subs typeS1, subs typeS2)
+        | TyInt -> TyInt
+        | TyBool -> TyBool
+        | TyId(s) -> (if s=typeX then typeT else TyId(s)) 
+    in subs typeS
+
+let apply_substitution_constraint typeX typeT constraints =
+    List.map (fun (typeS1,typeS2) -> (apply_substitution_type typeX typeT typeS1, apply_substitution_type typeX typeT typeS2)) constraints
 
 
-(*** TypeInfer ***)
+(* Função principal de unify -> resolve as equações nas constraints *)
+let unify constraints =
+    let rec unify_rec constraints = match constraints with
+        | [] -> []
+        | (TyInt,TyInt) :: tail -> unify_rec tail 
+        | (TyBool,TyBool) :: tail -> unify_rec tail 
+        | (TyId(typeX),typeT) :: tail -> 
+            if typeT = TyId(typeX) then unify_rec tail 
+            else if check_if_occurs typeX typeT then 
+                raise (CyclicSubstitution "Cyclic Substitution")
+            else
+                List.append (unify_rec (apply_substitution_constraint typeX typeT tail)) [(TyId(typeX),typeT)]
+        | (typeT,TyId(typeX)) :: tail -> 
+            if typeT = TyId(typeX) then unify_rec tail 
+            else if check_if_occurs typeX typeT then 
+                raise (CyclicSubstitution "Cyclic Substitution")
+            else
+                List.append (unify_rec (apply_substitution_constraint typeX typeT tail)) [(TyId(typeX),typeT)]
+        | (TyFn(typeT1,typeT2),TyFn(typeT3,typeT4)) :: tail -> unify_rec ((typeT1,typeT3) :: (typeT2,typeT4) :: tail) (* Caso 6 *)
+        | (TyList(typeT1),TyList(typeT2)) :: tail -> unify_rec ((typeT1,typeT2) :: tail) 
+        | (typeS,typeT)::tail -> raise (NotUnifiable "Couldn't unify constraints")
+    in unify_rec constraints
+
+
+
+(* === INFERÊNCIA DE TIPO === *)
+
+(** Função auxiliar **)
+let apply_substitution typeS typeT =
+    List.fold_left (fun typeS (TyId(typeX),tyC2) -> apply_substitution_type typeX tyC2 typeS) typeT (List.rev typeS)
+
+
 let typeInfer type_enviroment expression =
-  let tyT, nextuvar, tyEquations = get_constraints type_enviroment expression in
-    let  tySubstitutions = unify tyEquations in
-      applySubs tySubstitutions tyT
+    let typeT, nextuvar, constraints = get_constraints type_enviroment expression in
+        let  typeS = unify constraints in 
+                apply_substitution typeS typeT
 
 
