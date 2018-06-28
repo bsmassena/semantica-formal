@@ -13,7 +13,7 @@ let rec type_to_string (tp:tipo) : string =
 let rec list_to_string (lista: (tipo * tipo) list) =  match lista with
     | (head::tail) ->
         (match head with
-          | t1, t2 -> print_endline ("[" ^ (type_to_string t1) ^ " --- " ^ (type_to_string t2) ^ "]"))
+          | t1, t2 -> print_endline ("[" ^ (type_to_string t1) ^ "  |  " ^ (type_to_string t2) ^ "]"))
         ;
         list_to_string tail;
     | [] -> ();;
@@ -22,11 +22,11 @@ let rec list_to_string (lista: (tipo * tipo) list) =  match lista with
 let rec p_sub_inferred_types exp counter = match exp with
   | (hd::tl) ->
     (match hd with
-      | head -> let (teste, nextuvar, constr) = collectTyEqs [] hd in
+      | head -> let (teste, nextuvar, constr) = get_constraints [] hd in
         print_endline "*******************************************************";
-        Printf.printf "--> SUBEXPRESSIONS CONSTRAINTS / expression %d  \n\n" counter;
+        Printf.printf "--> CONSTRAINTS / expression %d  \n\n" counter;
         list_to_string constr;
-        print_endline "\n--> SUBEXPRESSIONS TYPE INFERENCE \n" ;
+        print_endline "\n--> CONSTRAINTS SOLVING (UNIFY) \n" ;
         (let tySubstitutions = unify constr in list_to_string tySubstitutions);
         print_endline "******************************************************* \n";
         p_sub_inferred_types tl (counter+1))

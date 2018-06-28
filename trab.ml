@@ -50,9 +50,10 @@ let eval_env e = evaluate test_env e
 let expr_list = [letrec_test; mult_test; head_test; tail_test; if_test; tail_test]
 
 (* Teste de inferencia de tipo com expressoes da lista *)
+let partial_inference_test = print_sub_inferred_types expr_list
+
 let inference_test = print_inferred_types expr_list
 
-let parameters_inference_test = print_sub_inferred_types expr_list
 
 
 
